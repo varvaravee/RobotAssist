@@ -1,0 +1,50 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px; /* Space between elements */
+  padding: 20px;
+}
+
+.camera-frame {
+  width: 100%;
+  max-width: 400px;
+  height: 250px;
+  background: black;
+  border: 2px solid #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 18px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Joystick Section */
+.joystick-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 50px;
+  margin-top: 20px;
+}
+
+#joystick-left, #joystick-right {
+  width: 150px;
+  height: 150px;
+  position: relative;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+}

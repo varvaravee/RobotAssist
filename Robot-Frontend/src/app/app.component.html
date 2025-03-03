@@ -1,0 +1,15 @@
+<div class="container">
+  <!-- Camera Feed -->
+  <video #videoElement class="camera-frame" autoplay></video>
+
+  <!-- Toggle Button -->
+  <button (click)="toggleDirection()">
+    {{ isForward ? 'Go Backward' : 'Go Forward' }}
+  </button>
+
+  <!-- Joystick Section (Below Camera and Button) -->
+  <div class="joystick-container">
+    <div id="joystick-left"></div>
+    <div id="joystick-right"></div>
+  </div>
+</div>
