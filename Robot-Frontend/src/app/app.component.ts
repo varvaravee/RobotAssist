@@ -9,9 +9,11 @@ import * as nipplejs from 'nipplejs';
 export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild('videoElement') videoElement!: ElementRef;
   isForward: boolean = true;
+  private socket!: WebSocket;
 
   ngOnInit() {
     // Initialize joystick when component is ready
+    this.initWebSocket();
     this.initJoystick();
   }
 
@@ -32,8 +34,35 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.isForward = !this.isForward;
   }
 
+  initWebSocket() {
+    this.socket = new WebSocket('ws://your-raspberry-pi-ip:9090'); // Connect to rosbridge
+
+    this.socket.onopen = () => {
+      console.log('Connected to ROS2 via rosbridge');
+    };
+
+    this.socket.onerror = (error) => {
+      console.error('WebSocket Error:', error);
+    };
+
+    this.socket.onmessage = (event) => {
+      console.log('Message from ROS2:', event.data);
+    };
+  }
+
+  sendJoystickCommand(topic: string, direction: string) {
+    const message = {
+      op: 'publish',
+      topic: topic,
+      msg: {
+        data: direction
+      }
+    };
+    this.socket.send(JSON.stringify(message));
+  }
+
   initJoystick() {
-    const leftJoystickElement = document.getElementById('joystick-left');
+  const leftJoystickElement = document.getElementById('joystick-left');
   const rightJoystickElement = document.getElementById('joystick-right');
 
   if (leftJoystickElement) {
@@ -47,11 +76,12 @@ export class AppComponent implements OnInit, AfterViewInit {
     });
 
     leftJoystick.on('move', (event, data) => {
-      console.log('Left Joystick moved:', data.direction?.angle);
+      console.log('Joystick Left:', data.direction.angle);
+      this.sendJoystickCommand('/joystick_left', data.direction.angle);
     });
 
     leftJoystick.on('end', () => {
-      console.log('Left Joystick released');
+      this.sendJoystickCommand('/joystick_left', 'STOP');
     });
   }
 
@@ -66,11 +96,14 @@ export class AppComponent implements OnInit, AfterViewInit {
     });
 
     rightJoystick.on('move', (event, data) => {
-      console.log('Right Joystick moved:', data.direction?.angle);
+      if (data.direction) {
+        console.log('Joystick Right:', data.direction.angle);
+        this.sendJoystickCommand('/joystick_right', data.direction.angle);
+      }
     });
 
     rightJoystick.on('end', () => {
-      console.log('Right Joystick released');
+      this.sendJoystickCommand('/joystick_right', 'STOP');
     });
   }
 }
