@@ -1,5 +1,6 @@
 import { Component, ViewChild, ElementRef, AfterViewInit, OnInit } from '@angular/core';
 import * as nipplejs from 'nipplejs';
+import * as ROSLIB from 'roslib';
 
 @Component({
   selector: 'app-root',
@@ -9,16 +10,16 @@ import * as nipplejs from 'nipplejs';
 export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild('videoElement') videoElement!: ElementRef;
   isForward: boolean = true;
-  private socket!: WebSocket;
+  private ros!: ROSLIB.Ros;
+  private leftJoystickPublisher!: ROSLIB.Topic;
+  private rightJoystickPublisher!: ROSLIB.Topic;
 
   ngOnInit() {
-    // Initialize joystick when component is ready
-    this.initWebSocket();
+    this.initRosConnection();
     this.initJoystick();
   }
 
   ngAfterViewInit() {
-    // Start the camera feed after the view is initialized
     this.startCameraFeed();
   }
 
@@ -34,77 +35,95 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.isForward = !this.isForward;
   }
 
-  initWebSocket() {
-    this.socket = new WebSocket('ws://your-raspberry-pi-ip:9090'); // Connect to rosbridge
+  initRosConnection() {
+    this.ros = new ROSLIB.Ros({
+      url: 'ws://192.168.1.29:9090' // Replace with actual IP
+    });
 
-    this.socket.onopen = () => {
-      console.log('Connected to ROS2 via rosbridge');
-    };
+    this.ros.on('connection', () => {
+      console.log('Connected to ROS 2 via rosbridge');
+    });
 
-    this.socket.onerror = (error) => {
+    this.ros.on('error', (error) => {
       console.error('WebSocket Error:', error);
-    };
+    });
 
-    this.socket.onmessage = (event) => {
-      console.log('Message from ROS2:', event.data);
-    };
+    this.ros.on('close', () => {
+      console.log('Connection to rosbridge closed.');
+    });
+
+    // Define publishers for joystick topics
+    this.leftJoystickPublisher = new ROSLIB.Topic({
+      ros: this.ros,
+      name: '/joystick_left',
+      messageType: 'geometry_msgs/Twist'
+    });
+
+    this.rightJoystickPublisher = new ROSLIB.Topic({
+      ros: this.ros,
+      name: '/joystick_right',
+      messageType: 'geometry_msgs/Twist'
+    });
   }
 
-  sendJoystickCommand(topic: string, direction: string) {
-    const message = {
-      op: 'publish',
-      topic: topic,
-      msg: {
-        data: direction
-      }
-    };
-    this.socket.send(JSON.stringify(message));
+  sendJoystickCommand(publisher: ROSLIB.Topic, x: number, y: number) {
+    console.log(`Publishing to ${publisher.name}: x=${x}, y=${y}`);
+    
+    const message = new ROSLIB.Message({
+      linear: { x: y, y: 0.0, z: 0.0 },
+      angular: { x: 0.0, y: 0.0, z: x }
+    });
+
+    publisher.publish(message);
   }
+
 
   initJoystick() {
-  const leftJoystickElement = document.getElementById('joystick-left');
-  const rightJoystickElement = document.getElementById('joystick-right');
+    const leftJoystickElement = document.getElementById('joystick-left');
+    const rightJoystickElement = document.getElementById('joystick-right');
 
-  if (leftJoystickElement) {
-    const leftJoystick = nipplejs.create({
-      zone: leftJoystickElement,
-      mode: 'static',
-      position: { left: '50%', top: '50%' },
-      color: 'blue',
-      size: 100,
-      lockY: true, // Left joystick moves only up/down
-    });
+    if (leftJoystickElement) {
+      const leftJoystick = nipplejs.create({
+        zone: leftJoystickElement,
+        mode: 'static',
+        position: { left: '50%', top: '50%' },
+        color: 'blue',
+        size: 100,
+        lockY: true // Left joystick moves only up/down
+      });
 
-    leftJoystick.on('move', (event, data) => {
-      console.log('Joystick Left:', data.direction.angle);
-      this.sendJoystickCommand('/joystick_left', data.direction.angle);
-    });
+      leftJoystick.on('move', (event, data) => {
+        const x = 0.0; // No rotation for left joystick
+        const y = data.force; // Movement speed based on joystick force
+        console.log('Joystick Left:', y);
+        this.sendJoystickCommand(this.leftJoystickPublisher, x, y);
+      });
 
-    leftJoystick.on('end', () => {
-      this.sendJoystickCommand('/joystick_left', 'STOP');
-    });
+      leftJoystick.on('end', () => {
+        this.sendJoystickCommand(this.leftJoystickPublisher, 0, 0);
+      });
+    }
+
+    if (rightJoystickElement) {
+      const rightJoystick = nipplejs.create({
+        zone: rightJoystickElement,
+        mode: 'static',
+        position: { left: '50%', top: '50%' },
+        color: 'red',
+        size: 100,
+        lockX: true // Right joystick moves only left/right
+      });
+
+      rightJoystick.on('move', (event, data) => {
+        const x = data.force; // Rotation speed based on joystick force
+        const y = 0.0; // No linear movement for right joystick
+        console.log('Joystick Right:', x);
+        this.sendJoystickCommand(this.rightJoystickPublisher, x, y);
+      });
+
+      rightJoystick.on('end', () => {
+        this.sendJoystickCommand(this.rightJoystickPublisher, 0, 0);
+      });
+    }
   }
-
-  if (rightJoystickElement) {
-    const rightJoystick = nipplejs.create({
-      zone: rightJoystickElement,
-      mode: 'static',
-      position: { left: '50%', top: '50%' },
-      color: 'red',
-      size: 100,
-      lockX: true, // Right joystick moves only left/right
-    });
-
-    rightJoystick.on('move', (event, data) => {
-      if (data.direction) {
-        console.log('Joystick Right:', data.direction.angle);
-        this.sendJoystickCommand('/joystick_right', data.direction.angle);
-      }
-    });
-
-    rightJoystick.on('end', () => {
-      this.sendJoystickCommand('/joystick_right', 'STOP');
-    });
-  }
-}
 }
