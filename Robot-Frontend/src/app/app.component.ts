@@ -44,9 +44,10 @@ export class AppComponent implements OnInit, AfterViewInit {
       console.log('Connected to ROS 2 via rosbridge');
     });
 
-    this.ros.on('error', (error) => {
+    this.ros.on('error', (error: any) => { 
       console.error('WebSocket Error:', error);
     });
+    
 
     this.ros.on('close', () => {
       console.log('Connection to rosbridge closed.');
