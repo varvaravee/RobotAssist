@@ -61,17 +61,16 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     this.rightJoystickPublisher = new ROSLIB.Topic({
       ros: this.ros,
-      name: '/joystick_right',
-      messageType: 'geometry_msgs/Twist'
+      name: '/steering_angle',
+      messageType: 'std_msgs/Float32'
     });
   }
 
-  sendJoystickCommand(publisher: ROSLIB.Topic, x: number, y: number) {
-    console.log(`Publishing to ${publisher.name}: x=${x}, y=${y}`);
+  sendJoystickCommand(publisher: ROSLIB.Topic, angle: number) {
+    console.log(`Publishing to ${publisher.name}: angle=${angle}`);
     
     const message = new ROSLIB.Message({
-      linear: { x: y, y: 0.0, z: 0.0 },
-      angular: { x: 0.0, y: 0.0, z: x }
+      data: angle
     });
 
     publisher.publish(message);
@@ -82,27 +81,27 @@ export class AppComponent implements OnInit, AfterViewInit {
     const leftJoystickElement = document.getElementById('joystick-left');
     const rightJoystickElement = document.getElementById('joystick-right');
 
-    if (leftJoystickElement) {
-      const leftJoystick = nipplejs.create({
-        zone: leftJoystickElement,
-        mode: 'static',
-        position: { left: '50%', top: '50%' },
-        color: 'blue',
-        size: 100,
-        lockY: true // Left joystick moves only up/down
-      });
+    // if (leftJoystickElement) {
+    //   const leftJoystick = nipplejs.create({
+    //     zone: leftJoystickElement,
+    //     mode: 'static',
+    //     position: { left: '50%', top: '50%' },
+    //     color: 'blue',
+    //     size: 100,
+    //     lockY: true // Left joystick moves only up/down
+    //   });
 
-      leftJoystick.on('move', (event, data) => {
-        const x = 0.0; // No rotation for left joystick
-        const y = data.force; // Movement speed based on joystick force
-        console.log('Joystick Left:', y);
-        this.sendJoystickCommand(this.leftJoystickPublisher, x, y);
-      });
+    //   leftJoystick.on('move', (event, data) => {
+    //     const x = 0.0; // No rotation for left joystick
+    //     const y = data.force; // Movement speed based on joystick force
+    //     console.log('Joystick Left:', y);
+    //     this.sendJoystickCommand(this.leftJoystickPublisher, x, y);
+    //   });
 
-      leftJoystick.on('end', () => {
-        this.sendJoystickCommand(this.leftJoystickPublisher, 0, 0);
-      });
-    }
+    //   leftJoystick.on('end', () => {
+    //     this.sendJoystickCommand(this.leftJoystickPublisher, 0, 0);
+    //   });
+    // }
 
     if (rightJoystickElement) {
       const rightJoystick = nipplejs.create({
@@ -118,11 +117,11 @@ export class AppComponent implements OnInit, AfterViewInit {
         const x = data.force; // Rotation speed based on joystick force
         const y = 0.0; // No linear movement for right joystick
         console.log('Joystick Right:', x);
-        this.sendJoystickCommand(this.rightJoystickPublisher, x, y);
+        this.sendJoystickCommand(this.rightJoystickPublisher, x);
       });
 
       rightJoystick.on('end', () => {
-        this.sendJoystickCommand(this.rightJoystickPublisher, 0, 0);
+        this.sendJoystickCommand(this.rightJoystickPublisher, 90);
       });
     }
   }
