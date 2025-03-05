@@ -115,10 +115,11 @@ export class AppComponent implements OnInit, AfterViewInit {
       });
 
       rightJoystick.on('move', (event, data) => {
-        const x = data.force; // Rotation speed based on joystick force
-        const y = 0.0; // No linear movement for right joystick
-        console.log('Joystick Right:', x);
-        this.sendJoystickCommand(this.rightJoystickPublisher, x);
+        if (!data.distance || !data.angle) return; // Ignore if no movement detected
+         // Map the joystick's horizontal angle (0° to 180°)
+        let degrees = Math.round((data.angle.degree / 180) * 180);
+        console.log(`Joystick Right Angle: ${degrees}°`);
+        this.sendJoystickCommand(this.rightJoystickPublisher, degrees);
       });
 
       rightJoystick.on('end', () => {
