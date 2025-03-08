@@ -9,7 +9,6 @@ import * as ROSLIB from 'roslib';
 })
 export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild('videoElement') videoElement!: ElementRef;
-  isForward: boolean = true;
   private ros!: ROSLIB.Ros;
   private leftJoystickPublisher!: ROSLIB.Topic;
   private rightJoystickPublisher!: ROSLIB.Topic;
@@ -29,10 +28,6 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.videoElement.nativeElement.srcObject = stream;
       })
       .catch((error) => console.error('Error accessing webcam:', error));
-  }
-
-  toggleDirection() {
-    this.isForward = !this.isForward;
   }
 
   initRosConnection() {
@@ -82,27 +77,40 @@ export class AppComponent implements OnInit, AfterViewInit {
     const leftJoystickElement = document.getElementById('joystick-left');
     const rightJoystickElement = document.getElementById('joystick-right');
 
-    // if (leftJoystickElement) {
-    //   const leftJoystick = nipplejs.create({
-    //     zone: leftJoystickElement,
-    //     mode: 'static',
-    //     position: { left: '50%', top: '50%' },
-    //     color: 'blue',
-    //     size: 100,
-    //     lockY: true // Left joystick moves only up/down
-    //   });
+    if (leftJoystickElement) {
+      const leftJoystick = nipplejs.create({
+        zone: leftJoystickElement,
+        mode: 'static',
+        position: { left: '50%', top: '50%' },
+        color: 'blue',
+        size: 100,
+        lockY: true // Left joystick moves only up/down
+      });
 
-    //   leftJoystick.on('move', (event, data) => {
-    //     const x = 0.0; // No rotation for left joystick
-    //     const y = data.force; // Movement speed based on joystick force
-    //     console.log('Joystick Left:', y);
-    //     this.sendJoystickCommand(this.leftJoystickPublisher, x, y);
-    //   });
+      leftJoystick.on('move', (event, data) => {
+        if (!data.vector) return; // Ignore if no movement detected
 
-    //   leftJoystick.on('end', () => {
-    //     this.sendJoystickCommand(this.leftJoystickPublisher, 0, 0);
-    //   });
-    // }
+          const y = data.vector.y; // Invert y-axis (up is negative)
+          
+          // Map y to speed range (-100 to -20 for reverse, 20 to 100 for forward)
+          let speed = 0;
+          if (y > 0) {
+            // Forward motion: Map (0 to 1) → (20 to 100)
+            speed = Math.round(20 + y * 80);
+          } else if (y < 0) {
+            // Backward motion: Map (-1 to 0) → (-100 to -20)
+            speed = Math.round(-20 + y * 80);
+          }
+
+          console.log(`Left Joystick Speed: ${speed}`);
+
+          this.sendJoystickCommand(this.leftJoystickPublisher, speed);
+      });
+
+      leftJoystick.on('end', () => {
+        this.sendJoystickCommand(this.leftJoystickPublisher, 0);
+      });
+    }
 
     if (rightJoystickElement) {
       const rightJoystick = nipplejs.create({
@@ -115,11 +123,14 @@ export class AppComponent implements OnInit, AfterViewInit {
       });
 
       rightJoystick.on('move', (event, data) => {
-        if (!data.distance || !data.angle) return; // Ignore if no movement detected
-         // Map the joystick's horizontal angle (0° to 180°)
-        let degrees = Math.round((data.angle.degree / 180) * 180);
-        console.log(`Joystick Right Angle: ${degrees}°`);
-        this.sendJoystickCommand(this.rightJoystickPublisher, degrees);
+        if (!data.vector) return; // Ignore if no movement detected
+
+          const x = data.vector.x; // Get horizontal movement (-1 to 1)
+          const degrees = Math.round((1 - x) * 90); // Map from 0° (right) to 180° (left)
+
+          console.log(`Joystick Right Angle: ${degrees}°`);
+
+          this.sendJoystickCommand(this.rightJoystickPublisher, degrees);
       });
 
       rightJoystick.on('end', () => {
