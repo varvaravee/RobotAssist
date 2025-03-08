@@ -75,6 +75,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   initJoystick() {
     const leftJoystickElement = document.getElementById('joystick-left');
     const rightJoystickElement = document.getElementById('joystick-right');
+    const joint1JoystickElement = document.getElementById('joystick-joint1');
+    const joint2JoystickElement = document.getElementById('joystick-joint2');
 
     if (leftJoystickElement) {
       const leftJoystick = nipplejs.create({

@@ -30,7 +30,7 @@ img {
   margin-top: 20px;
 }
 
-#joystick-left, #joystick-right {
+#joystick-left, #joystick-right, #joystick-joint1, #joystick-joint2 {
   width: 150px;
   height: 150px;
   position: relative;
