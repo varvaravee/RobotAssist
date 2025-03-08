@@ -12,6 +12,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   private ros!: ROSLIB.Ros;
   private leftJoystickPublisher!: ROSLIB.Topic;
   private rightJoystickPublisher!: ROSLIB.Topic;
+  private joint1JoystickPublisher!: ROSLIB.Topic;
+  private joint2JoystickPublisher!: ROSLIB.Topic;
 
   // Set the video URL to the Raspberry Pi stream
   videoUrl: string = 'http://192.168.1.29:8080/?action=stream';
@@ -57,6 +59,18 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.rightJoystickPublisher = new ROSLIB.Topic({
       ros: this.ros,
       name: '/steering_angle',
+      messageType: 'std_msgs/Float32'
+    });
+
+    this.joint1JoystickPublisher = new ROSLIB.Topic({
+      ros: this.ros,
+      name: '/arm_joint_1_angle',
+      messageType: 'std_msgs/Float32'
+    });
+
+    this.joint2JoystickPublisher = new ROSLIB.Topic({
+      ros: this.ros,
+      name: '/arm_joint_2_angle',
       messageType: 'std_msgs/Float32'
     });
   }
@@ -146,6 +160,58 @@ export class AppComponent implements OnInit, AfterViewInit {
 
       rightJoystick.on('end', () => {
         this.sendJoystickCommand(this.rightJoystickPublisher, 90);
+      });
+    }
+
+    if (joint1JoystickElement) {
+      const joint1Joystick = nipplejs.create({
+        zone: joint1JoystickElement,
+        mode: 'static',
+        position: { left: '50%', top: '50%' },
+        color: 'green',
+        size: 100,
+        lockY: true // Right joystick moves only up/down
+      });
+
+      joint1Joystick.on('move', (event, data) => {
+        if (!data.vector) return; // Ignore if no movement detected
+
+        const y = data.vector.y; // Get horizontal movement (-1 to 1)
+        const degrees = Math.round((1 - y) * 90); // Map from 0° (up) to 180° (down)
+
+        console.log(`Joystick Joint1 Angle: ${degrees}°`);
+
+          this.sendJoystickCommand(this.joint1JoystickPublisher, degrees);
+      });
+
+      joint1Joystick.on('end', () => {
+        this.sendJoystickCommand(this.joint1JoystickPublisher, 90);
+      });
+    }
+
+    if (joint2JoystickElement) {
+      const joint2Joystick = nipplejs.create({
+        zone: joint2JoystickElement,
+        mode: 'static',
+        position: { left: '50%', top: '50%' },
+        color: 'purple',
+        size: 100,
+        lockY: true // Right joystick moves only up/down
+      });
+
+      joint2Joystick.on('move', (event, data) => {
+        if (!data.vector) return; // Ignore if no movement detected
+
+        const y = data.vector.y; // Get horizontal movement (-1 to 1)
+        const degrees = Math.round((1 - y) * 90); // Map from 0° (up) to 180° (down)
+
+        console.log(`Joystick Joint2 Angle: ${degrees}°`);
+
+          this.sendJoystickCommand(this.joint2JoystickPublisher, degrees);
+      });
+
+      joint2Joystick.on('end', () => {
+        this.sendJoystickCommand(this.joint2JoystickPublisher, 90);
       });
     }
   }

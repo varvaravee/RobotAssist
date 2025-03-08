@@ -24,16 +24,40 @@ img {
 /* Joystick Section */
 .joystick-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  gap: 50px;
+  justify-content: space-evenly;
   margin-top: 20px;
+  gap: 20px;
+}
+
+.joystick-row {
+  display: flex;
+  justify-content: space-evenly;
+  gap: 20px; /* Space between joysticks in a row */
 }
 
 #joystick-left, #joystick-right, #joystick-joint1, #joystick-joint2 {
   width: 150px;
   height: 150px;
-  position: relative;
+  position: relative; /* Necessary for absolute positioning of label */
   background: rgba(0, 0, 0, 0.1);
   border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Label styling */
+.label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 18px;
+  font-weight: bold;
+  color:#ffffff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6); /* Adds a shadow for contrast and visibility */
+  z-index: 999; /* Ensure label is above joystick */
+  pointer-events: none;
 }
