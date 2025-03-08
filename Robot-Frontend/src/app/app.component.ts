@@ -14,6 +14,9 @@ export class AppComponent implements OnInit, AfterViewInit {
   private leftJoystickPublisher!: ROSLIB.Topic;
   private rightJoystickPublisher!: ROSLIB.Topic;
 
+  // Set the video URL to the Raspberry Pi stream
+  videoUrl: string = 'http://192.168.1.29:8080/?action=stream';
+
   ngOnInit() {
     this.initRosConnection();
     this.initJoystick();
@@ -24,11 +27,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   startCameraFeed() {
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then((stream) => {
-        this.videoElement.nativeElement.srcObject = stream;
-      })
-      .catch((error) => console.error('Error accessing webcam:', error));
+    console.log('Streaming camera from:', this.videoUrl);
   }
 
   toggleDirection() {

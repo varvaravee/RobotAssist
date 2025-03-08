@@ -1,6 +1,9 @@
 <div class="container">
   <!-- Camera Feed -->
-  <video #videoElement class="camera-frame" autoplay></video>
+  <div class="video-container">
+    <img #videoElement [src]="videoUrl" alt="Camera Feed" />
+  </div>
+  
 
   <!-- Toggle Button -->
   <button (click)="toggleDirection()">

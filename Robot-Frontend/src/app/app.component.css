@@ -6,15 +6,19 @@
   padding: 20px;
 }
 
-.camera-frame {
-  width: 100%;
-  max-width: 400px;
-  height: 250px;
-  background: black;
-  border: 2px solid #ccc;
+.video-container {
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 300px;
+  width: 100%;
+  background: #fff;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  border: 2px solid #fff;
 }
 
 button {
