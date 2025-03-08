@@ -50,8 +50,8 @@ export class AppComponent implements OnInit, AfterViewInit {
     // Define publishers for joystick topics
     this.leftJoystickPublisher = new ROSLIB.Topic({
       ros: this.ros,
-      name: '/joystick_left',
-      messageType: 'geometry_msgs/Twist'
+      name: '/motor_commands',
+      messageType: 'std_msgs/Int16MultiArray'
     });
 
     this.rightJoystickPublisher = new ROSLIB.Topic({
@@ -61,15 +61,25 @@ export class AppComponent implements OnInit, AfterViewInit {
     });
   }
 
-  sendJoystickCommand(publisher: ROSLIB.Topic, angle: number) {
-    console.log(`Publishing to ${publisher.name}: angle=${angle}`);
+  sendJoystickCommand(publisher: ROSLIB.Topic, data: number | number[]) {
+    console.log(`Publishing to ${publisher.name}:`, data);
+  
+    let message;
     
-    const message = new ROSLIB.Message({
-      data: angle
-    });
-
+    if (Array.isArray(data)) {
+      // If data is an array, send it as Int16MultiArray
+      message = new ROSLIB.Message({
+        data: data
+      });
+    } else {
+      // If data is a single number, send it as Float32
+      message = new ROSLIB.Message({
+        data: parseFloat(data.toFixed(2)) // Ensure it's a float
+      });
+    }  
     publisher.publish(message);
   }
+  
 
 
   initJoystick() {
@@ -105,11 +115,11 @@ export class AppComponent implements OnInit, AfterViewInit {
 
           console.log(`Left Joystick Speed: ${speed}`);
 
-          this.sendJoystickCommand(this.leftJoystickPublisher, speed);
+          this.sendJoystickCommand(this.leftJoystickPublisher, [speed, speed]);
       });
 
       leftJoystick.on('end', () => {
-        this.sendJoystickCommand(this.leftJoystickPublisher, 0);
+        this.sendJoystickCommand(this.leftJoystickPublisher, [0,0]);
       });
     }
 
