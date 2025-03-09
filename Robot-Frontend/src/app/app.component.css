@@ -37,7 +37,7 @@ img {
   gap: 20px; /* Space between joysticks in a row */
 }
 
-#joystick-left, #joystick-right, #joystick-joint1, #joystick-joint2 {
+#joystick-combined, #joystick-joint1, #joystick-joint2 {
   width: 150px;
   height: 150px;
   position: relative; /* Necessary for absolute positioning of label */

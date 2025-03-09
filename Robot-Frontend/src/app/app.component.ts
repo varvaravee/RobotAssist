@@ -97,25 +97,26 @@ export class AppComponent implements OnInit, AfterViewInit {
 
 
   initJoystick() {
-    const leftJoystickElement = document.getElementById('joystick-left');
-    const rightJoystickElement = document.getElementById('joystick-right');
+    const joystickElement = document.getElementById('joystick-combined');
     const joint1JoystickElement = document.getElementById('joystick-joint1');
     const joint2JoystickElement = document.getElementById('joystick-joint2');
 
-    if (leftJoystickElement) {
-      const leftJoystick = nipplejs.create({
-        zone: leftJoystickElement,
+    if (joystickElement) {
+      const joystick = nipplejs.create({
+        zone: joystickElement,
         mode: 'static',
         position: { left: '50%', top: '50%' },
         color: 'blue',
         size: 100,
-        lockY: true // Left joystick moves only up/down
+      
       });
 
-      leftJoystick.on('move', (event, data) => {
+      joystick.on('move', (event, data) => {
         if (!data.vector) return; // Ignore if no movement detected
 
-          const y = data.vector.y; // Invert y-axis (up is negative)
+          const x = data.vector.x; //x-axis 
+          const y = data.vector.y; //y-axis , stinky buttheos
+    
           
           // Map y to speed range (-100 to -20 for reverse, 20 to 100 for forward)
           let speed = 0;
@@ -127,41 +128,55 @@ export class AppComponent implements OnInit, AfterViewInit {
             speed = Math.round(-20 + y * 80);
           }
 
-          console.log(`Left Joystick Speed: ${speed}`);
+          // Calculate direction (angle in degrees)
+          let angle = Math.atan2(y, x) * (180 / Math.PI); // -180 to 180
+          // Convert angle so backward movement is also within 0-180 range
+          if (angle < 0) {
+            angle = Math.abs(angle); // Flip negative angles to positive
+          }
+          angle = Math.round(angle); //round angle
 
+          //console output for troubleshooting
+          console.log(`Joystick Moved Speed: ${speed}, Angle: ${angle}`);
+
+          //send commands to trigger ros topics through rosbridge
           this.sendJoystickCommand(this.leftJoystickPublisher, [speed, speed]);
+          this.sendJoystickCommand(this.rightJoystickPublisher, angle);
+
+
       });
 
-      leftJoystick.on('end', () => {
+      joystick.on('end', () => {
         this.sendJoystickCommand(this.leftJoystickPublisher, [0,0]);
-      });
-    }
-
-    if (rightJoystickElement) {
-      const rightJoystick = nipplejs.create({
-        zone: rightJoystickElement,
-        mode: 'static',
-        position: { left: '50%', top: '50%' },
-        color: 'red',
-        size: 100,
-        lockX: true // Right joystick moves only left/right
-      });
-
-      rightJoystick.on('move', (event, data) => {
-        if (!data.vector) return; // Ignore if no movement detected
-
-          const x = data.vector.x; // Get horizontal movement (-1 to 1)
-          const degrees = Math.round((1 - x) * 90); // Map from 0° (right) to 180° (left)
-
-          console.log(`Joystick Right Angle: ${degrees}°`);
-
-          this.sendJoystickCommand(this.rightJoystickPublisher, degrees);
-      });
-
-      rightJoystick.on('end', () => {
         this.sendJoystickCommand(this.rightJoystickPublisher, 90);
       });
     }
+
+    // if (rightJoystickElement) {
+    //   const rightJoystick = nipplejs.create({
+    //     zone: rightJoystickElement,
+    //     mode: 'static',
+    //     position: { left: '50%', top: '50%' },
+    //     color: 'red',
+    //     size: 100,
+    //     lockX: true // Right joystick moves only left/right
+    //   });
+
+    //   rightJoystick.on('move', (event, data) => {
+    //     if (!data.vector) return; // Ignore if no movement detected
+
+    //       const x = data.vector.x; // Get horizontal movement (-1 to 1)
+    //       const degrees = Math.round((1 - x) * 90); // Map from 0° (right) to 180° (left)
+
+    //       console.log(`Joystick Right Angle: ${degrees}°`);
+
+    //       this.sendJoystickCommand(this.rightJoystickPublisher, degrees);
+    //   });
+
+    //   rightJoystick.on('end', () => {
+    //     this.sendJoystickCommand(this.rightJoystickPublisher, 90);
+    //   });
+    // }
 
     if (joint1JoystickElement) {
       const joint1Joystick = nipplejs.create({
