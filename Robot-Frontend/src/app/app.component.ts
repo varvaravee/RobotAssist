@@ -118,13 +118,14 @@ export class AppComponent implements OnInit, AfterViewInit {
           const y = data.vector.y; //y-axis , stinky buttheos
     
           
+          // Map y to speed range (-100 to -20 for reverse, 20 to 100 for forward)
           let speed = 0;
           if (y > 0) {
-            // Forward motion: Map (0 to 1) → (-100 to -20)
-            speed = Math.round(-100 + y * 80);
+            // Forward motion: Map (0 to 1) → (20 to 100)
+            speed = Math.round(20 + y * 80);
           } else if (y < 0) {
-            // Backward motion: Map (-1 to 0) → (20 to 100)
-            speed = Math.round(100 + y * 80);
+            // Backward motion: Map (-1 to 0) → (-100 to -20)
+            speed = Math.round(-20 + y * 80);
           }
 
           // Calculate direction (angle in degrees)
