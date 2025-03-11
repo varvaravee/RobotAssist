@@ -16,8 +16,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   private joint2JoystickPublisher!: ROSLIB.Topic;
 
   // Set the video URL to the Raspberry Pi stream
-  videoUrl: string = 'http://192.168.1.29:8080/?action=stream';
-
+  videoUrl: string = 'http://11.21.40.244:8080/?action=stream';
+  //videoUrl: string = 'http://11.21.40.246:8098/video_feed'
   ngOnInit() {
     this.initRosConnection();
     this.initJoystick();
