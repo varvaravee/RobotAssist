@@ -119,14 +119,11 @@ export class AppComponent implements OnInit, AfterViewInit {
     
           
           // Map y to speed range (-100 to -20 for reverse, 20 to 100 for forward)
-          let speed = 0;
-          if (y > 0) {
-            // Forward motion: Map (0 to 1) → (20 to 100)
-            speed = Math.round(20 + y * 80);
-          } else if (y < 0) {
-            // Backward motion: Map (-1 to 0) → (-100 to -20)
-            speed = Math.round(-20 + y * 80);
-          }
+          const magnitude = Math.sqrt(x * x + y * y); // Joystick distance from center (0 to 1)
+          const direction = y >= 0 ? 1 : -1; // Forward (1) or backward (-1)
+          
+          // Map magnitude to speed range (20 to 100 for forward, -20 to -100 for reverse)
+          let speed = Math.round(direction * (20 + magnitude * 80));
 
           // Calculate direction (angle in degrees)
           let angle = Math.atan2(y, x) * (180 / Math.PI); // -180 to 180
