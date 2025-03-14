@@ -10,6 +10,8 @@
   <div class="indicator-container">
     <div class="indicator" [class.on]="isDetectionOn" [class.off]="!isDetectionOn"></div>
     <button class = "object-detection-btn" [ngClass]="{'active': isDetectionOn}" (click)="toggleDetection()">{{ isDetectionOn ? 'Stop Detection' : 'Start Detection' }}</button>
+    <button class= "object-detection-btn" (click)="toggleClaw()">Toggle Claw</button>
+
   </div>
 
   <!-- Joystick Section (Below Camera and Button) -->

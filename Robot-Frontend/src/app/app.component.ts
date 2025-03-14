@@ -14,11 +14,13 @@ export class AppComponent implements OnInit, AfterViewInit {
   private rightJoystickPublisher!: ROSLIB.Topic;
   private joint1JoystickPublisher!: ROSLIB.Topic;
   private joint2JoystickPublisher!: ROSLIB.Topic;
+  private clawPublisher!: ROSLIB.Topic;
 
   // Set the video URL to the Raspberry Pi stream
   videoUrl: string = 'http://11.21.40.244:8080/?action=stream';
   //object detection tracking variable
-  isDetectionOn = false; 
+  isDetectionOn = false;
+  isClawOpen = false; 
   //videoUrl: string = 'http://11.21.40.246:8098/video_feed'
   ngOnInit() {
     this.initRosConnection();
@@ -90,6 +92,12 @@ export class AppComponent implements OnInit, AfterViewInit {
       name: '/arm_joint_2_angle',
       messageType: 'std_msgs/Float32'
     });
+
+    this.clawPublisher = new ROSLIB.Topic({
+      ros: this.ros,
+      name: '/claw_command',
+      messageType: 'std_msgs/Bool'
+    })
   }
 
   sendJoystickCommand(publisher: ROSLIB.Topic, data: number | number[]) {
@@ -243,5 +251,15 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.sendJoystickCommand(this.joint2JoystickPublisher, 90);
       });
     }
+  }
+
+  toggleClaw() {
+    this.isClawOpen = !this.isClawOpen;
+    const message = new ROSLIB.Message({
+      data: this.isClawOpen
+    });
+
+    this.clawPublisher.publish(message);
+    console.log(`Claw ${this.isClawOpen ? 'Opened' : 'Closed'}`);
   }
 }
