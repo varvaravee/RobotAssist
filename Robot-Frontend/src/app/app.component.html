@@ -5,7 +5,12 @@
   <div class="video-container">
     <img #videoElement [src]="videoUrl" alt="Camera Feed" />
   </div>
-  
+
+  <!-- Toggle Obj Detection-->
+  <div class="indicator-container">
+    <div class="indicator" [class.on]="isDetectionOn" [class.off]="!isDetectionOn"></div>
+    <button class = "object-detection-btn" [ngClass]="{'active': isDetectionOn}" (click)="toggleDetection()">{{ isDetectionOn ? 'Stop Detection' : 'Start Detection' }}</button>
+  </div>
 
   <!-- Joystick Section (Below Camera and Button) -->
   <div class="joystick-container">

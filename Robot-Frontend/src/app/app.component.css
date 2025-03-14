@@ -72,6 +72,58 @@ img {
   border: 2px solid #fff;
 }
 
+.indicator-container {
+  display: flex;
+  flex-direction: row;  /* Stack items vertically */
+  margin: 20px;
+  align-items: center;
+  justify-content: center;
+  gap: 15px; /* Adds spacing between elements */
+}
+
+/* Indicator Light */
+.indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease-in-out;
+}
+
+/* Default: OFF (Red Light) */
+.indicator.off {
+  background-color: red;
+}
+
+/* ON State (Green Light) */
+.indicator.on {
+  background-color: green;
+}
+
+/* Button Styling */
+.object-detection-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.object-detection-btn:hover {
+  background-color: #0056b3;
+}
+
+.object-detection-btn:active {
+  transform: scale(0.95);
+}
+
+/* Toggled State */
+.object-detection-btn.active {
+  background-color: #ff4500;
+}
+
 /* Joystick Section */
 .joystick-container {
   display: flex;

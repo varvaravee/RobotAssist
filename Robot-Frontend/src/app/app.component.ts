@@ -17,6 +17,8 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   // Set the video URL to the Raspberry Pi stream
   videoUrl: string = 'http://11.21.40.244:8080/?action=stream';
+  //object detection tracking variable
+  isDetectionOn = false; 
   //videoUrl: string = 'http://11.21.40.246:8098/video_feed'
   ngOnInit() {
     this.initRosConnection();
@@ -29,6 +31,21 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   startCameraFeed() {
     console.log('Streaming camera from:', this.videoUrl);
+  }
+
+  toggleDetection() {
+    this.isDetectionOn = !this.isDetectionOn;
+    
+    // Example: Changing the URL feed dynamically
+    if (this.isDetectionOn) {
+      console.log('Object Detection ON');
+      // Set the feed to the object detection URL
+      this.videoUrl = 'http://11.21.40.246:8098/video_feed';
+    } else {
+      console.log('Object Detection OFF');
+      // Set the feed to the normal camera URL
+      this.videoUrl = 'http://11.21.40.244:8080/?action=stream';
+    }
   }
 
   initRosConnection() {
