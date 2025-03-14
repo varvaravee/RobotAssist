@@ -16,7 +16,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   private joint2JoystickPublisher!: ROSLIB.Topic;
 
   // Set the video URL to the Raspberry Pi stream
-  videoUrl: string = 'http://11.21.40.244:8080/?action=stream';
+  videoUrl: string = 'http://172.25.51.182:8080/?action=stream';
   //object detection tracking variable
   isDetectionOn = false; 
   //videoUrl: string = 'http://11.21.40.246:8098/video_feed'
@@ -26,8 +26,11 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.startCameraFeed();
+    if (this.videoElement) {
+      this.videoElement.nativeElement.src = this.videoUrl;
+    }
   }
+  
 
   startCameraFeed() {
     console.log('Streaming camera from:', this.videoUrl);
@@ -36,21 +39,17 @@ export class AppComponent implements OnInit, AfterViewInit {
   toggleDetection() {
     this.isDetectionOn = !this.isDetectionOn;
     
-    // Example: Changing the URL feed dynamically
-    if (this.isDetectionOn) {
-      console.log('Object Detection ON');
-      // Set the feed to the object detection URL
-      this.videoUrl = 'http://11.21.40.246:8098/video_feed';
-    } else {
-      console.log('Object Detection OFF');
-      // Set the feed to the normal camera URL
-      this.videoUrl = 'http://11.21.40.244:8080/?action=stream';
-    }
+    // Update the video feed URL
+    this.videoUrl = this.isDetectionOn
+      ? 'http://172.25.51.182:8098/video_feed'
+      : 'http://172.25.51.182:8080/?action=stream';
   }
+  
+  
 
   initRosConnection() {
     this.ros = new ROSLIB.Ros({
-      url: 'ws://192.168.1.29:9090' // Replace with actual IP
+      url: 'ws://169.234.85.24:9090' // Replace with actual IP
     });
 
     this.ros.on('connection', () => {
